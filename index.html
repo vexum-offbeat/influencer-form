@@ -29,6 +29,9 @@
       color: var(--text);
       min-height: 100vh;
       padding: 24px 16px 48px;
+      /* タブレット・PC対応：中央寄せ＋最大幅 */
+      max-width: 640px;
+      margin: 0 auto;
     }
 
     .header {
@@ -89,6 +92,28 @@
 
     .uid-badge .uid-label { color: var(--text-sub); }
     .uid-badge .uid-value { font-weight: 600; color: var(--text); word-break: break-all; }
+
+    /* ── 登録済み警告バナー ── */
+    .already-registered-banner {
+      display: none;
+      background: #fffbeb;
+      border: 1.5px solid #f59e0b;
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: #92400e;
+      line-height: 1.6;
+    }
+
+    .already-registered-banner .banner-title {
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+      color: #b45309;
+    }
 
     /* ── カード・セクション ── */
     .card {
@@ -167,6 +192,148 @@
       display: none;
     }
 
+    /* ── コードルックアップ ステータス表示 ── */
+    .lookup-status {
+      font-size: 12px;
+      margin-top: 5px;
+      min-height: 18px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .lookup-status.loading { color: var(--text-sub); }
+    .lookup-status.success { color: #16a34a; font-weight: 600; }
+    .lookup-status.not-found { color: #f59e0b; }
+    .lookup-status.fetch-error { color: var(--error); }
+
+    /* コードと名前のセットを視覚的にグループ化 */
+    .field-group {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .field-group .field { margin-bottom: 10px; }
+    .field-group .field:last-child { margin-bottom: 0; }
+
+    .field-group-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+    }
+
+    input[readonly] {
+      background: #f1f5f9;
+      color: #475569;
+      cursor: default;
+    }
+
+    input[readonly]:focus {
+      border-color: var(--border);
+      box-shadow: none;
+    }
+
+    /* ── 金融機関種別ラジオボタン ── */
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      font-size: 15px;
+      font-weight: 400;
+    }
+
+    .radio-option:has(input:checked) {
+      border-color: var(--line-green);
+      background: #f0fdf4;
+      font-weight: 600;
+    }
+
+    .radio-option input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--line-green);
+      flex-shrink: 0;
+    }
+
+    /* ── ゆうちょ 通帳ガイド画像風 ── */
+    .yucho-guide {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 14px;
+      font-size: 13px;
+      color: #92400e;
+      line-height: 1.7;
+    }
+
+    .yucho-guide strong { color: #78350f; }
+
+    /* ── インフルエンサーID 複数入力 ── */
+    .influencer-id-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .influencer-id-row input {
+      flex: 1;
+    }
+
+    .btn-remove-id {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      background: #fee2e2;
+      color: var(--error);
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .btn-remove-id:hover { background: #fecaca; }
+
+    .btn-add-id {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+      padding: 8px 14px;
+      background: #f0fdf4;
+      color: var(--line-green-dark);
+      border: 1.5px dashed var(--line-green);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-add-id:hover { background: #dcfce7; }
+
     select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
 
     textarea { resize: vertical; min-height: 80px; }
@@ -227,6 +394,23 @@
     #success-screen h2 { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
     #success-screen p { color: var(--text-sub); font-size: 14px; line-height: 1.7; }
 
+    /* バグ6修正：閉じるボタン */
+    .btn-close {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 12px 32px;
+      background: var(--line-green);
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-close:active { opacity: 0.8; }
+
     /* ── プライバシー注記 ── */
     .privacy-note {
       font-size: 11px;
@@ -284,6 +468,15 @@
       </div>
     </div>
 
+    <!-- すでに登録済みの場合の警告バナー -->
+    <div class="already-registered-banner" id="already-registered-banner">
+      <div class="banner-title">⚠️ すでに登録済みのアカウントです</div>
+      <div>
+        このLINEアカウントの情報はすでに受け付け済みです。<br>
+        <strong>登録内容や振込先口座を変更したい場合のみ</strong>、新しい内容を入力して送信してください（最新情報に更新されます）。
+      </div>
+    </div>
+
     <form id="register-form" novalidate>
 
       <!-- 基本情報 -->
@@ -292,8 +485,13 @@
 
         <div class="field">
           <label>インフルエンサーID <span class="required">*</span></label>
-          <input type="text" id="influencer-id" placeholder="例：influencer_001" required />
-          <div class="error-msg" id="err-influencer-id">インフルエンサーIDを入力してください</div>
+          <div id="influencer-id-list">
+            <div class="influencer-id-row" data-index="0">
+              <input type="text" class="influencer-id-input" placeholder="例：influencer_001" />
+            </div>
+          </div>
+          <button type="button" class="btn-add-id" id="btn-add-id">＋ アカウントを追加</button>
+          <div class="error-msg" id="err-influencer-id">インフルエンサーIDを1つ以上入力してください</div>
         </div>
 
         <div class="field">
@@ -313,34 +511,89 @@
       <div class="card">
         <div class="section-title">🏦 振込口座情報</div>
 
+        <!-- 金融機関種別選択 -->
         <div class="field">
-          <label>銀行名 <span class="required">*</span></label>
-          <input type="text" id="bank-name" placeholder="例：三菱UFJ銀行" required />
-          <div class="error-msg" id="err-bank-name">銀行名を入力してください</div>
+          <label>金融機関の種類 <span class="required">*</span></label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="bank-type" value="normal" checked />
+              銀行・信用金庫・農協など
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="bank-type" value="yucho" />
+              ゆうちょ銀行
+            </label>
+          </div>
         </div>
 
-        <div class="field">
-          <label>支店名 <span class="required">*</span></label>
-          <input type="text" id="branch-name" placeholder="例：渋谷支店" required />
-          <div class="error-msg" id="err-branch-name">支店名を入力してください</div>
+        <!-- ▼ 一般銀行セクション -->
+        <div id="normal-bank-section">
+          <div class="field-group">
+            <div class="field-group-label">🏦 金融機関</div>
+            <div class="field">
+              <label>金融機関コード<span class="hint">（4桁・任意）コード入力で名称を自動入力</span></label>
+              <input type="tel" id="bank-code" placeholder="例：0005" maxlength="4" inputmode="numeric" />
+              <div class="lookup-status" id="status-bank"></div>
+            </div>
+            <div class="field">
+              <label>銀行名 <span class="required">*</span></label>
+              <input type="text" id="bank-name" placeholder="例：三菱UFJ銀行" />
+              <div class="error-msg" id="err-bank-name">銀行名を入力してください</div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <div class="field-group-label">🏢 支店</div>
+            <div class="field">
+              <label>支店コード<span class="hint">（3桁・任意）コード入力で名称を自動入力</span></label>
+              <input type="tel" id="branch-code" placeholder="例：001" maxlength="3" inputmode="numeric" />
+              <div class="lookup-status" id="status-branch"></div>
+            </div>
+            <div class="field">
+              <label>支店名 <span class="required">*</span></label>
+              <input type="text" id="branch-name" placeholder="例：渋谷支店" />
+              <div class="error-msg" id="err-branch-name">支店名を入力してください</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>口座種別 <span class="required">*</span></label>
+            <select id="account-type">
+              <option value="">選択してください</option>
+              <option value="普通">普通</option>
+              <option value="当座">当座</option>
+            </select>
+            <div class="error-msg" id="err-account-type">口座種別を選択してください</div>
+          </div>
+
+          <div class="field">
+            <label>口座番号 <span class="required">*</span></label>
+            <input type="tel" id="account-number" placeholder="例：1234567" maxlength="8" />
+            <div class="error-msg" id="err-account-number">口座番号を入力してください</div>
+          </div>
         </div>
 
-        <div class="field">
-          <label>口座種別 <span class="required">*</span></label>
-          <select id="account-type" required>
-            <option value="">選択してください</option>
-            <option value="普通">普通</option>
-            <option value="当座">当座</option>
-          </select>
-          <div class="error-msg" id="err-account-type">口座種別を選択してください</div>
+        <!-- ▼ ゆうちょ銀行セクション -->
+        <div id="yucho-section" style="display:none;">
+          <div class="yucho-guide">
+            📖 <strong>通帳の左上に記載されている「記号」と「番号」をご入力ください。</strong><br>
+            振込に必要な変換は自動で行います。
+          </div>
+
+          <div class="field">
+            <label>記号 <span class="required">*</span><span class="hint">（5桁の数字）</span></label>
+            <input type="tel" id="yucho-kigo" placeholder="例：10120" maxlength="5" inputmode="numeric" />
+            <div class="error-msg" id="err-yucho-kigo">記号（5桁）を入力してください</div>
+          </div>
+
+          <div class="field">
+            <label>番号 <span class="required">*</span><span class="hint">（記号の下の数字・最大8桁）</span></label>
+            <input type="tel" id="yucho-bango" placeholder="例：12345671" maxlength="8" inputmode="numeric" />
+            <div class="error-msg" id="err-yucho-bango">番号を入力してください</div>
+          </div>
         </div>
 
-        <div class="field">
-          <label>口座番号 <span class="required">*</span></label>
-          <input type="tel" id="account-number" placeholder="例：1234567" maxlength="8" required />
-          <div class="error-msg" id="err-account-number">口座番号を入力してください</div>
-        </div>
-
+        <!-- 口座名義（共通） -->
         <div class="field">
           <label>口座名義（カタカナ）<span class="required">*</span></label>
           <input type="text" id="account-holder" placeholder="例：ヤマダ タロウ" required />
@@ -370,6 +623,8 @@
     </div>
     <h2>登録が完了しました！</h2>
     <p>ご登録ありがとうございます。<br>お支払い情報を受け付けました。<br><br>ご不明な点がございましたら<br>担当者までお問い合わせください。</p>
+    <!-- バグ6修正：LIFFウィンドウを閉じるボタン -->
+    <button class="btn-close" onclick="closeLiff()">閉じる</button>
   </div>
 
   <script>
@@ -381,6 +636,162 @@
     // ============================================================
 
     let lineUserId = '';
+
+    // ============================================================
+    // 金融機関・支店コード 自動入力ロジック
+    // ============================================================
+
+    // セッション内メモリキャッシュ（同コードの再検索を防ぐ）
+    const lookupCache = {};
+
+    // デバウンス：入力が止まってから delay ms 後に実行
+    function debounce(fn, delay) {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+      };
+    }
+
+    // ステータス表示ヘルパー
+    function setStatus(elId, type, message) {
+      const el = document.getElementById(elId);
+      el.className = `lookup-status ${type}`;
+      el.textContent = message;
+    }
+
+    // ── 金融機関コードで名称を検索 ──
+    async function lookupBank(code) {
+      const statusId = 'status-bank';
+      const nameEl   = document.getElementById('bank-name');
+
+      if (code.length !== 4) {
+        setStatus(statusId, '', '');
+        return;
+      }
+
+      // メモリキャッシュヒット
+      const cacheKey = `bank_${code}`;
+      if (lookupCache[cacheKey]) {
+        nameEl.value = lookupCache[cacheKey];
+        setStatus(statusId, 'success', '✓ 自動入力しました');
+        return;
+      }
+
+      setStatus(statusId, 'loading', '🔍 検索中...');
+
+      try {
+        const res  = await fetch(`${GAS_URL}?type=bank&bankCode=${code}`);
+        const data = await res.json();
+
+        if (data.status === 'ok') {
+          lookupCache[cacheKey] = data.name;
+          nameEl.value = data.name;
+          // 銀行が変わったら支店をリセット
+          document.getElementById('branch-name').value = '';
+          document.getElementById('branch-code').value = '';
+          setStatus('status-branch', '', '');
+          setStatus(statusId, 'success', `✓ ${data.name}`);
+        } else if (data.status === 'not_found') {
+          setStatus(statusId, 'not-found', '⚠ 該当する金融機関が見つかりません。手入力してください');
+        } else {
+          setStatus(statusId, 'fetch-error', '検索に失敗しました。手入力してください');
+        }
+      } catch (err) {
+        setStatus(statusId, 'fetch-error', '検索に失敗しました。手入力してください');
+      }
+    }
+
+    // ── 支店コードで名称を検索 ──
+    async function lookupBranch(branchCode) {
+      const statusId = 'status-branch';
+      const bankCode = document.getElementById('bank-code').value.trim();
+      const nameEl   = document.getElementById('branch-name');
+
+      if (branchCode.length !== 3) {
+        setStatus(statusId, '', '');
+        return;
+      }
+
+      if (!bankCode || bankCode.length !== 4) {
+        setStatus(statusId, 'not-found', '⚠ 先に金融機関コード（4桁）を入力してください');
+        return;
+      }
+
+      // メモリキャッシュヒット
+      const cacheKey = `branch_${bankCode}_${branchCode}`;
+      if (lookupCache[cacheKey]) {
+        nameEl.value = lookupCache[cacheKey];
+        setStatus(statusId, 'success', '✓ 自動入力しました');
+        return;
+      }
+
+      setStatus(statusId, 'loading', '🔍 検索中...');
+
+      try {
+        const res  = await fetch(`${GAS_URL}?type=branch&bankCode=${bankCode}&branchCode=${branchCode}`);
+        const data = await res.json();
+
+        if (data.status === 'ok') {
+          lookupCache[cacheKey] = data.name;
+          nameEl.value = data.name;
+          setStatus(statusId, 'success', `✓ ${data.name}`);
+        } else if (data.status === 'not_found') {
+          setStatus(statusId, 'not-found', '⚠ 該当する支店が見つかりません。手入力してください');
+        } else {
+          setStatus(statusId, 'fetch-error', '検索に失敗しました。手入力してください');
+        }
+      } catch (err) {
+        setStatus(statusId, 'fetch-error', '検索に失敗しました。手入力してください');
+      }
+    }
+
+    // イベントリスナー（デバウンス 500ms）
+    document.getElementById('bank-code')
+      .addEventListener('input', debounce((e) => lookupBank(e.target.value.trim()), 500));
+
+    document.getElementById('branch-code')
+      .addEventListener('input', debounce((e) => lookupBranch(e.target.value.trim()), 500));
+
+    // ============================================================
+    // ゆうちょ銀行 変換ロジック
+    // ============================================================
+
+    const KANJI_DIGITS = { '0':'〇','1':'一','2':'二','3':'三','4':'四','5':'五','6':'六','7':'七','8':'八','9':'九' };
+
+    // 記号（5桁）→ 店番（3桁）・店名
+    function kigoToTenban(kigo) {
+      if (kigo.length !== 5) return null;
+      const tenban = kigo.slice(1, 3) + '8'; // 2・3桁目 + "8"
+      const tenName = tenban.split('').map(d => KANJI_DIGITS[d] || d).join('') + '店';
+      return { tenban, tenName };
+    }
+
+    // 番号（最大8桁）→ 振込用口座番号（7桁）
+    function bangoToKouzaNum(bango) {
+      const digits = bango.replace(/\D/g, '');
+      if (digits.length < 2) return null;
+      // 末尾1桁（チェックディジット）を除いて7桁右詰めゼロ埋め
+      const trimmed = digits.slice(0, -1);
+      return trimmed.padStart(7, '0');
+    }
+
+    // ── 金融機関種別の切り替え ──
+    document.querySelectorAll('input[name="bank-type"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        const isYucho = e.target.value === 'yucho';
+        document.getElementById('normal-bank-section').style.display = isYucho ? 'none' : 'block';
+        document.getElementById('yucho-section').style.display      = isYucho ? 'block' : 'none';
+      });
+    });
+
+    // ── バグ9修正：ゆうちょ記号・番号から非数字をリアルタイムで除去 ──
+    ['yucho-kigo', 'yucho-bango'].forEach(id => {
+      document.getElementById(id).addEventListener('input', (e) => {
+        const cleaned = e.target.value.replace(/\D/g, '');
+        if (e.target.value !== cleaned) e.target.value = cleaned;
+      });
+    });
 
     // ── LIFF 初期化 ──
     async function initLiff() {
@@ -399,6 +810,9 @@
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('main-content').style.display = 'block';
 
+        // 登録済みかどうかをチェックしてバナーを出し分け
+        checkIfAlreadyRegistered(lineUserId);
+
       } catch (err) {
         console.error('LIFF初期化エラー:', err);
         document.getElementById('loading-screen').innerHTML =
@@ -406,33 +820,131 @@
       }
     }
 
+    // ── 登録済み確認チェック ──
+    async function checkIfAlreadyRegistered(uid) {
+      if (!uid || !GAS_URL || GAS_URL.startsWith('YOUR_')) return;
+
+      try {
+        const res = await fetch(`${GAS_URL}?type=check_user&userId=${encodeURIComponent(uid)}`);
+        const result = await res.json();
+
+        if (result.status === 'ok' && result.registered) {
+          // すでに登録されている場合：バナーを表示しボタン文言を変更
+          document.getElementById('already-registered-banner').style.display = 'block';
+          const btn = document.getElementById('submit-btn');
+          if (btn) btn.textContent = '登録内容を更新する';
+        }
+      } catch (e) {
+        console.warn('登録チェックに失敗しました（スキップします）:', e);
+      }
+    }
+
+    // ── インフルエンサーIDの動的追加・削除 ──
+    document.getElementById('btn-add-id').addEventListener('click', () => {
+      const list = document.getElementById('influencer-id-list');
+      const newRow = document.createElement('div');
+      newRow.className = 'influencer-id-row';
+      newRow.innerHTML = `
+        <input type="text" class="influencer-id-input" placeholder="例：influencer_002" />
+        <button type="button" class="btn-remove-id" title="削除">✕</button>
+      `;
+
+      // 削除ボタンのイベント
+      newRow.querySelector('.btn-remove-id').addEventListener('click', () => {
+        newRow.remove();
+      });
+
+      list.appendChild(newRow);
+      newRow.querySelector('input').focus();
+    });
+
+    // ── インフルエンサーIDの取得ユーティリティ ──
+    function getInfluencerIds() {
+      const inputs = document.querySelectorAll('.influencer-id-input');
+      const ids = [];
+      inputs.forEach(input => {
+        const val = input.value.trim();
+        if (val) ids.push(val);
+      });
+      return ids;
+    }
+
     // ── バリデーション ──
     function validate() {
-      const fields = [
-        { id: 'influencer-id', errId: 'err-influencer-id' },
-        { id: 'full-name',     errId: 'err-full-name' },
-        { id: 'address',       errId: 'err-address' },
-        { id: 'bank-name',     errId: 'err-bank-name' },
-        { id: 'branch-name',   errId: 'err-branch-name' },
-        { id: 'account-type',  errId: 'err-account-type' },
-        { id: 'account-number',errId: 'err-account-number' },
-        { id: 'account-holder',errId: 'err-account-holder' },
-      ];
-
+      const isYucho = document.querySelector('input[name="bank-type"]:checked').value === 'yucho';
       let valid = true;
 
-      fields.forEach(({ id, errId }) => {
+      // インフルエンサーIDチェック（1つ以上必須）
+      const influencerIds = getInfluencerIds();
+      const firstIdInput = document.querySelector('.influencer-id-input');
+      const errIdEl = document.getElementById('err-influencer-id');
+
+      if (influencerIds.length === 0) {
+        if (firstIdInput) firstIdInput.classList.add('error');
+        if (errIdEl) errIdEl.style.display = 'block';
+        valid = false;
+      } else {
+        document.querySelectorAll('.influencer-id-input').forEach(input => input.classList.remove('error'));
+        if (errIdEl) errIdEl.style.display = 'none';
+      }
+
+      // 共通項目
+      const commonFields = [
+        { id: 'full-name',      errId: 'err-full-name' },
+        { id: 'address',        errId: 'err-address' },
+        { id: 'account-holder', errId: 'err-account-holder' },
+      ];
+
+      // 一般銀行専用項目
+      const normalFields = [
+        { id: 'bank-name',      errId: 'err-bank-name' },
+        { id: 'branch-name',    errId: 'err-branch-name' },
+        { id: 'account-type',   errId: 'err-account-type' },
+        { id: 'account-number', errId: 'err-account-number' },
+      ];
+
+      // ゆうちょ専用項目
+      const yuchoFields = [
+        { id: 'yucho-kigo',  errId: 'err-yucho-kigo' },
+        { id: 'yucho-bango', errId: 'err-yucho-bango' },
+      ];
+
+      const targetFields = [...commonFields, ...(isYucho ? yuchoFields : normalFields)];
+
+      targetFields.forEach(({ id, errId }) => {
         const el  = document.getElementById(id);
         const err = document.getElementById(errId);
-        if (!el.value.trim()) {
-          el.classList.add('error');
-          err.style.display = 'block';
+        if (!el || !el.value.trim()) {
+          if (el) el.classList.add('error');
+          if (err) err.style.display = 'block';
           valid = false;
         } else {
-          el.classList.remove('error');
-          err.style.display = 'none';
+          if (el) el.classList.remove('error');
+          if (err) err.style.display = 'none';
         }
       });
+
+      // ゆうちょ: 記号が5桁かチェック
+      if (isYucho && valid) {
+        const kigo = document.getElementById('yucho-kigo').value.trim();
+        if (kigo.length !== 5) {
+          document.getElementById('yucho-kigo').classList.add('error');
+          document.getElementById('err-yucho-kigo').textContent = '記号は5桁で入力してください';
+          document.getElementById('err-yucho-kigo').style.display = 'block';
+          valid = false;
+        }
+      }
+
+      // バグ3修正：ゆうちょ番号が最低2桁以上あるかチェック（変換に最低2桁必要）
+      if (isYucho && valid) {
+        const bango = document.getElementById('yucho-bango').value.trim();
+        if (bango.length < 2) {
+          document.getElementById('yucho-bango').classList.add('error');
+          document.getElementById('err-yucho-bango').textContent = '番号は2桁以上で入力してください';
+          document.getElementById('err-yucho-bango').style.display = 'block';
+          valid = false;
+        }
+      }
 
       return valid;
     }
@@ -443,21 +955,53 @@
       if (!validate()) return;
 
       const btn = document.getElementById('submit-btn');
+      // バグ1修正：送信前のボタン文言を保持しておく（失敗時の復元用）
+      const originalBtnText = btn.textContent.trim();
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span>送信中...';
 
-      const payload = {
-        lineUserId:     lineUserId,
-        influencerId:   document.getElementById('influencer-id').value.trim(),
-        fullName:       document.getElementById('full-name').value.trim(),
-        address:        document.getElementById('address').value.trim(),
-        bankName:       document.getElementById('bank-name').value.trim(),
-        branchName:     document.getElementById('branch-name').value.trim(),
-        accountType:    document.getElementById('account-type').value,
-        accountNumber:  document.getElementById('account-number').value.trim(),
-        accountHolder:  document.getElementById('account-holder').value.trim(),
-        submittedAt:    new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }),
+      const isYucho = document.querySelector('input[name="bank-type"]:checked').value === 'yucho';
+      const influencerIds = getInfluencerIds();
+
+      let payload = {
+        lineUserId:    lineUserId,
+        influencerIds: influencerIds,
+        fullName:      document.getElementById('full-name').value.trim(),
+        address:       document.getElementById('address').value.trim(),
+        accountHolder: document.getElementById('account-holder').value.trim(),
+        submittedAt:   new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }),
+        bankType:      isYucho ? 'yucho' : 'normal',
       };
+
+      if (isYucho) {
+        // ゆうちょ：変換を実施してセット
+        const kigo  = document.getElementById('yucho-kigo').value.trim();
+        const bango = document.getElementById('yucho-bango').value.trim();
+        const tenInfo  = kigoToTenban(kigo);
+        const kouzaNum = bangoToKouzaNum(bango);
+
+        payload = {
+          ...payload,
+          bankName:      'ゆうちょ銀行',
+          branchName:    tenInfo ? tenInfo.tenName : '',  // 例：〇一八店
+          accountType:   '通常',
+          accountNumber: kouzaNum || '',                  // 振込用7桁口座番号
+          yuchoKigo:     kigo,                            // 元データ保存
+          yuchoBango:    bango,                           // 元データ保存
+          yuchoTenban:   tenInfo ? tenInfo.tenban : '',   // 振込用店番
+        };
+      } else {
+        payload = {
+          ...payload,
+          bankName:     document.getElementById('bank-name').value.trim(),
+          branchName:   document.getElementById('branch-name').value.trim(),
+          accountType:  document.getElementById('account-type').value,
+          accountNumber:document.getElementById('account-number').value.trim(),
+          yuchoKigo:    '',
+          yuchoBango:   '',
+          yuchoTenban:  '',
+        };
+      }
 
       try {
         const res = await fetch(GAS_URL, {
@@ -479,12 +1023,23 @@
         console.error('送信エラー:', err);
         alert('送信に失敗しました。\n時間をおいて再度お試しください。\n\nエラー: ' + err.message);
         btn.disabled = false;
-        btn.innerHTML = '登録する';
+        // バグ1修正：送信前の文言に戻す（「登録する」or「登録内容を更新する」）
+        btn.textContent = originalBtnText;
       }
     });
 
     // ── 起動 ──
     initLiff();
+
+    // バグ6修正：閉じるボタンの処理（LIFFウィンドウを閉じる）
+    function closeLiff() {
+      if (liff.isInClient()) {
+        liff.closeWindow();
+      } else {
+        // ブラウザで開いている場合はタブを閉じる（閉じられない場合はメッセージ）
+        window.close();
+      }
+    }
   </script>
 </body>
 </html>
