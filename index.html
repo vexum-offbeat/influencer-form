@@ -500,10 +500,27 @@
           <div class="error-msg" id="err-full-name">本名を入力してください</div>
         </div>
 
-        <div class="field">
-          <label>住所 <span class="required">*</span><span class="hint">（郵便番号から番地まで）</span></label>
-          <textarea id="address" placeholder="例：〒100-0001 東京都千代田区千代田1-1-1" required></textarea>
-          <div class="error-msg" id="err-address">住所を入力してください</div>
+        <div class="field-group">
+          <div class="field-group-label">📍 ご住所</div>
+
+          <div class="field">
+            <label>郵便番号 <span class="required">*</span><span class="hint">（7桁・ハイフンなし可）住所が自動入力されます</span></label>
+            <input type="tel" id="postal-code" placeholder="例：1000001 または 100-0001" maxlength="8" inputmode="numeric" />
+            <div class="lookup-status" id="status-postal"></div>
+            <div class="error-msg" id="err-postal-code">郵便番号を入力してください</div>
+          </div>
+
+          <div class="field">
+            <label>都道府県・市区町村・町域 <span class="required">*</span></label>
+            <input type="text" id="address-auto" placeholder="例：東京都千代田区千代田" />
+            <div class="error-msg" id="err-address-auto">住所（市区町村・町域）を入力してください</div>
+          </div>
+
+          <div class="field">
+            <label>番地・建物名・部屋番号 <span class="required">*</span></label>
+            <input type="text" id="address-detail" placeholder="例：1-1-1 〇〇マンション201" />
+            <div class="error-msg" id="err-address-detail">番地・建物名等を入力してください</div>
+          </div>
         </div>
       </div>
 
@@ -756,6 +773,79 @@
       .addEventListener('input', debounce((e) => lookupBranch(e.target.value.trim()), 500));
 
     // ============================================================
+    // 郵便番号 住所自動検索ロジック（zipcloud API）
+    // ============================================================
+    const postalCache = {};
+
+    async function lookupPostalCode(rawVal) {
+      const statusId = 'status-postal';
+      const cleanVal = rawVal.replace(/\D/g, ''); // ハイフン等除去
+      const autoEl   = document.getElementById('address-auto');
+      const errPostal = document.getElementById('err-postal-code');
+
+      if (cleanVal.length !== 7) {
+        setStatus(statusId, '', '');
+        return;
+      }
+
+      if (postalCache[cleanVal]) {
+        applyAddress(postalCache[cleanVal]);
+        setStatus(statusId, 'success', '✓ 住所を自動入力しました');
+        return;
+      }
+
+      setStatus(statusId, 'loading', '🔍 住所を検索中...');
+
+      try {
+        const res = await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${cleanVal}`);
+        const data = await res.json();
+
+        if (data.status === 200 && data.results && data.results.length > 0) {
+          const r = data.results[0];
+          const fullAddress = `${r.address1}${r.address2}${r.address3}`;
+          postalCache[cleanVal] = fullAddress;
+          applyAddress(fullAddress);
+          setStatus(statusId, 'success', '✓ 住所を自動入力しました');
+        } else {
+          setStatus(statusId, 'not-found', '⚠ 住所が見つかりませんでした。手入力してください');
+        }
+      } catch (err) {
+        console.error('郵便番号検索エラー:', err);
+        setStatus(statusId, 'fetch-error', '検索に失敗しました。手入力してください');
+      }
+    }
+
+    function applyAddress(addr) {
+      const autoEl = document.getElementById('address-auto');
+
+      // 都道府県・市区町村欄に既に入力がある場合は上書きしない
+      if (autoEl.value.trim() !== '') {
+        setStatus('status-postal', 'success', '✓ 郵便番号を確認しました（住所は入力済みのものを使用）');
+        const postEl = document.getElementById('postal-code');
+        postEl.classList.remove('error');
+        const errPostal = document.getElementById('err-postal-code');
+        if (errPostal) errPostal.style.display = 'none';
+        return;
+      }
+
+      autoEl.value = addr;
+      autoEl.classList.remove('error');
+      const errAuto = document.getElementById('err-address-auto');
+      if (errAuto) errAuto.style.display = 'none';
+
+      const postEl = document.getElementById('postal-code');
+      postEl.classList.remove('error');
+      const errPostal = document.getElementById('err-postal-code');
+      if (errPostal) errPostal.style.display = 'none';
+
+      // 番地入力欄へスムーズにフォーカス
+      document.getElementById('address-detail').focus();
+    }
+
+    document.getElementById('postal-code')
+      .addEventListener('input', debounce((e) => lookupPostalCode(e.target.value.trim()), 400));
+
+    // ============================================================
     // ゆうちょ銀行 変換ロジック
     // ============================================================
 
@@ -893,7 +983,9 @@
       // 共通項目
       const commonFields = [
         { id: 'full-name',      errId: 'err-full-name' },
-        { id: 'address',        errId: 'err-address' },
+        { id: 'postal-code',    errId: 'err-postal-code' },
+        { id: 'address-auto',   errId: 'err-address-auto' },
+        { id: 'address-detail', errId: 'err-address-detail' },
         { id: 'account-holder', errId: 'err-account-holder' },
       ];
 
@@ -965,11 +1057,17 @@
       const isYucho = document.querySelector('input[name="bank-type"]:checked').value === 'yucho';
       const influencerIds = getInfluencerIds();
 
+      // 住所の組み立て（〒郵便番号 都道府県市区町村 番地建物名）
+      const postal = document.getElementById('postal-code').value.trim();
+      const addr1  = document.getElementById('address-auto').value.trim();
+      const addr2  = document.getElementById('address-detail').value.trim();
+      const fullAddress = `〒${postal} ${addr1} ${addr2}`.trim();
+
       let payload = {
         lineUserId:    lineUserId,
         influencerIds: influencerIds,
         fullName:      document.getElementById('full-name').value.trim(),
-        address:       document.getElementById('address').value.trim(),
+        address:       fullAddress,
         accountHolder: document.getElementById('account-holder').value.trim(),
         submittedAt:   new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }),
         bankType:      isYucho ? 'yucho' : 'normal',
