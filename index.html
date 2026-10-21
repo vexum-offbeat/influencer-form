@@ -1104,20 +1104,17 @@
       }
 
       try {
-        const res = await fetch(GAS_URL, {
+        // GASのCORS制約回避: no-corsモードで送信（preflightを発生させない）
+        await fetch(GAS_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          mode: 'no-cors',
           body: JSON.stringify(payload),
         });
 
-        const result = await res.json();
-
-        if (result.status === 'ok') {
-          document.getElementById('main-content').style.display = 'none';
-          document.getElementById('success-screen').style.display = 'block';
-        } else {
-          throw new Error(result.message || '送信失敗');
-        }
+        // no-corsではレスポンスボディが読めないため、送信完了とみなして完了画面へ
+        // GAS側のバリデーションエラーはスプレッドシートの実行ログで確認
+        document.getElementById('main-content').style.display = 'none';
+        document.getElementById('success-screen').style.display = 'block';
 
       } catch (err) {
         console.error('送信エラー:', err);
