@@ -660,7 +660,9 @@
       el.textContent = message;
     }
 
-    // ── 金融機関コードで名称を検索 ──
+    // ── 金融機関コードで名称を検索（CDNから直接取得）──
+    let allBanksCache = null; // 全金融機関データ（初回のみ取得）
+
     async function lookupBank(code) {
       const statusId = 'status-bank';
       const nameEl   = document.getElementById('bank-name');
@@ -670,39 +672,40 @@
         return;
       }
 
-      // メモリキャッシュヒット
-      const cacheKey = `bank_${code}`;
-      if (lookupCache[cacheKey]) {
-        nameEl.value = lookupCache[cacheKey];
-        setStatus(statusId, 'success', '✓ 自動入力しました');
-        return;
-      }
-
       setStatus(statusId, 'loading', '🔍 検索中...');
 
       try {
-        const res  = await fetch(`${GAS_URL}?type=bank&bankCode=${code}`);
-        const data = await res.json();
+        if (!allBanksCache) {
+          const res = await fetch('https://cdn.jsdelivr.net/gh/zengin-code/source-data@master/data/banks.json');
+          if (!res.ok) throw new Error('データ取得失敗');
+          allBanksCache = await res.json();
+        }
 
-        if (data.status === 'ok') {
-          lookupCache[cacheKey] = data.name;
-          nameEl.value = data.name;
+        const bank = allBanksCache[code];
+
+        if (bank && bank.name) {
+          nameEl.value = bank.name;
+          nameEl.classList.remove('error');
+          const errEl = document.getElementById('err-bank-name');
+          if (errEl) errEl.style.display = 'none';
+
           // 銀行が変わったら支店をリセット
           document.getElementById('branch-name').value = '';
           document.getElementById('branch-code').value = '';
           setStatus('status-branch', '', '');
-          setStatus(statusId, 'success', `✓ ${data.name}`);
-        } else if (data.status === 'not_found') {
-          setStatus(statusId, 'not-found', '⚠ 該当する金融機関が見つかりません。手入力してください');
+          setStatus(statusId, 'success', `✓ ${bank.name}`);
         } else {
-          setStatus(statusId, 'fetch-error', '検索に失敗しました。手入力してください');
+          setStatus(statusId, 'not-found', '⚠ 該当する金融機関が見つかりません。手入力してください');
         }
       } catch (err) {
+        console.error('金融機関検索エラー:', err);
         setStatus(statusId, 'fetch-error', '検索に失敗しました。手入力してください');
       }
     }
 
-    // ── 支店コードで名称を検索 ──
+    // ── 支店コードで名称を検索（CDNから直接取得）──
+    const branchCacheByBank = {}; // 銀行ごとの支店データキャッシュ
+
     async function lookupBranch(branchCode) {
       const statusId = 'status-branch';
       const bankCode = document.getElementById('bank-code').value.trim();
@@ -718,30 +721,29 @@
         return;
       }
 
-      // メモリキャッシュヒット
-      const cacheKey = `branch_${bankCode}_${branchCode}`;
-      if (lookupCache[cacheKey]) {
-        nameEl.value = lookupCache[cacheKey];
-        setStatus(statusId, 'success', '✓ 自動入力しました');
-        return;
-      }
-
       setStatus(statusId, 'loading', '🔍 検索中...');
 
       try {
-        const res  = await fetch(`${GAS_URL}?type=branch&bankCode=${bankCode}&branchCode=${branchCode}`);
-        const data = await res.json();
+        if (!branchCacheByBank[bankCode]) {
+          const res = await fetch(`https://cdn.jsdelivr.net/gh/zengin-code/source-data@master/data/branches/${bankCode}.json`);
+          if (!res.ok) throw new Error('支店データ取得失敗');
+          branchCacheByBank[bankCode] = await res.json();
+        }
 
-        if (data.status === 'ok') {
-          lookupCache[cacheKey] = data.name;
-          nameEl.value = data.name;
-          setStatus(statusId, 'success', `✓ ${data.name}`);
-        } else if (data.status === 'not_found') {
-          setStatus(statusId, 'not-found', '⚠ 該当する支店が見つかりません。手入力してください');
+        const branch = branchCacheByBank[bankCode][branchCode];
+
+        if (branch && branch.name) {
+          nameEl.value = branch.name;
+          nameEl.classList.remove('error');
+          const errEl = document.getElementById('err-branch-name');
+          if (errEl) errEl.style.display = 'none';
+
+          setStatus(statusId, 'success', `✓ ${branch.name}`);
         } else {
-          setStatus(statusId, 'fetch-error', '検索に失敗しました。手入力してください');
+          setStatus(statusId, 'not-found', '⚠ 該当する支店が見つかりません。手入力してください');
         }
       } catch (err) {
+        console.error('支店検索エラー:', err);
         setStatus(statusId, 'fetch-error', '検索に失敗しました。手入力してください');
       }
     }
