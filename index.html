@@ -1104,7 +1104,9 @@
 
         payload = {
           ...payload,
+          bankCode:      '9900',
           bankName:      'ゆうちょ銀行',
+          branchCode:    tenInfo ? tenInfo.tenban : '',   // 振込用店番（3桁）
           branchName:    tenInfo ? tenInfo.tenName : '',   // 例：〇一八店 or 〇一九店
           accountType:   tenInfo ? tenInfo.accountType : '通常', // 通常貯金=通常、振替口座=当座
           accountNumber: kouzaNum || '',                   // 振込用7桁口座番号
@@ -1115,7 +1117,9 @@
       } else {
         payload = {
           ...payload,
+          bankCode:     document.getElementById('bank-code').value.trim(),
           bankName:     document.getElementById('bank-name').value.trim(),
+          branchCode:   document.getElementById('branch-code').value.trim(),
           branchName:   document.getElementById('branch-name').value.trim(),
           accountType:  document.getElementById('account-type').value,
           accountNumber:document.getElementById('account-number').value.trim(),
