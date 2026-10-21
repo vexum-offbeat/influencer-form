@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>インフルエンサー情報登録</title>
+
+  <!-- LINE LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <style>
+    :root {
+      --line-green: #06C755;
+      --line-green-dark: #05a848;
+      --bg: #f0f4f8;
+      --card: #ffffff;
+      --text: #1a1a2e;
+      --text-sub: #6b7280;
+      --border: #e2e8f0;
+      --error: #ef4444;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .header .logo {
+      width: 56px;
+      height: 56px;
+      background: var(--line-green);
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .header .logo svg { width: 32px; height: 32px; fill: white; }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .header p {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-top: 6px;
+    }
+
+    /* ── LINE User ID バッジ ── */
+    .uid-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 13px;
+    }
+
+    .uid-badge .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--line-green);
+      flex-shrink: 0;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .uid-badge .uid-label { color: var(--text-sub); }
+    .uid-badge .uid-value { font-weight: 600; color: var(--text); word-break: break-all; }
+
+    /* ── カード・セクション ── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── フォーム部品 ── */
+    .field { margin-bottom: 16px; }
+    .field:last-child { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    label .required {
+      color: var(--error);
+      margin-left: 4px;
+    }
+
+    label .hint {
+      font-weight: 400;
+      color: var(--text-sub);
+      font-size: 12px;
+      margin-left: 6px;
+    }
+
+    input[type="text"],
+    input[type="tel"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--text);
+      background: #fafafa;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--line-green);
+      box-shadow: 0 0 0 3px rgba(6,199,85,0.15);
+      background: #fff;
+    }
+
+    input.error, select.error, textarea.error {
+      border-color: var(--error);
+    }
+
+    .error-msg {
+      font-size: 12px;
+      color: var(--error);
+      margin-top: 4px;
+      display: none;
+    }
+
+    select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    /* ── 送信ボタン ── */
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      background: var(--line-green);
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 8px;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-submit:hover { background: var(--line-green-dark); }
+    .btn-submit:active { transform: scale(0.98); }
+    .btn-submit:disabled { background: #9ca3af; cursor: not-allowed; }
+
+    /* ── 送信中スピナー ── */
+    .spinner {
+      display: inline-block;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── 完了画面 ── */
+    #success-screen {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .success-icon {
+      width: 80px; height: 80px;
+      background: #f0fdf4;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+
+    .success-icon svg { width: 40px; height: 40px; }
+
+    #success-screen h2 { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+    #success-screen p { color: var(--text-sub); font-size: 14px; line-height: 1.7; }
+
+    /* ── プライバシー注記 ── */
+    .privacy-note {
+      font-size: 11px;
+      color: var(--text-sub);
+      text-align: center;
+      margin-top: 16px;
+      line-height: 1.6;
+    }
+
+    /* ── ローディング ── */
+    #loading-screen {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-sub);
+    }
+
+    #loading-screen .spinner {
+      border-color: rgba(6,199,85,0.3);
+      border-top-color: var(--line-green);
+      width: 32px; height: 32px;
+      border-width: 3px;
+      margin: 0 auto 16px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ローディング画面 -->
+  <div id="loading-screen">
+    <div class="spinner"></div>
+    <p>LINEアカウントを確認中...</p>
+  </div>
+
+  <!-- メインフォーム -->
+  <div id="main-content" style="display:none;">
+
+    <div class="header">
+      <div class="logo">
+        <!-- LINEアイコン風 -->
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.48 2 2 6.12 2 11.17c0 3.32 1.88 6.23 4.72 8.03L6 22l3.26-1.7c.87.24 1.79.37 2.74.37 5.52 0 10-4.12 10-9.17S17.52 2 12 2z"/>
+        </svg>
+      </div>
+      <h1>インフルエンサー情報登録</h1>
+      <p>お支払いに必要な情報をご入力ください</p>
+    </div>
+
+    <!-- LINE User ID バッジ -->
+    <div class="uid-badge">
+      <div class="dot"></div>
+      <div>
+        <div class="uid-label">LINE アカウント連携済み</div>
+        <div class="uid-value" id="display-uid">取得中...</div>
+      </div>
+    </div>
+
+    <form id="register-form" novalidate>
+
+      <!-- 基本情報 -->
+      <div class="card">
+        <div class="section-title">📋 基本情報</div>
+
+        <div class="field">
+          <label>インフルエンサーID <span class="required">*</span></label>
+          <input type="text" id="influencer-id" placeholder="例：influencer_001" required />
+          <div class="error-msg" id="err-influencer-id">インフルエンサーIDを入力してください</div>
+        </div>
+
+        <div class="field">
+          <label>本名（フルネーム）<span class="required">*</span></label>
+          <input type="text" id="full-name" placeholder="例：山田 太郎" required />
+          <div class="error-msg" id="err-full-name">本名を入力してください</div>
+        </div>
+
+        <div class="field">
+          <label>住所 <span class="required">*</span><span class="hint">（郵便番号から番地まで）</span></label>
+          <textarea id="address" placeholder="例：〒100-0001 東京都千代田区千代田1-1-1" required></textarea>
+          <div class="error-msg" id="err-address">住所を入力してください</div>
+        </div>
+      </div>
+
+      <!-- 振込口座情報 -->
+      <div class="card">
+        <div class="section-title">🏦 振込口座情報</div>
+
+        <div class="field">
+          <label>銀行名 <span class="required">*</span></label>
+          <input type="text" id="bank-name" placeholder="例：三菱UFJ銀行" required />
+          <div class="error-msg" id="err-bank-name">銀行名を入力してください</div>
+        </div>
+
+        <div class="field">
+          <label>支店名 <span class="required">*</span></label>
+          <input type="text" id="branch-name" placeholder="例：渋谷支店" required />
+          <div class="error-msg" id="err-branch-name">支店名を入力してください</div>
+        </div>
+
+        <div class="field">
+          <label>口座種別 <span class="required">*</span></label>
+          <select id="account-type" required>
+            <option value="">選択してください</option>
+            <option value="普通">普通</option>
+            <option value="当座">当座</option>
+          </select>
+          <div class="error-msg" id="err-account-type">口座種別を選択してください</div>
+        </div>
+
+        <div class="field">
+          <label>口座番号 <span class="required">*</span></label>
+          <input type="tel" id="account-number" placeholder="例：1234567" maxlength="8" required />
+          <div class="error-msg" id="err-account-number">口座番号を入力してください</div>
+        </div>
+
+        <div class="field">
+          <label>口座名義（カタカナ）<span class="required">*</span></label>
+          <input type="text" id="account-holder" placeholder="例：ヤマダ タロウ" required />
+          <div class="error-msg" id="err-account-holder">口座名義をカタカナで入力してください</div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submit-btn">
+        登録する
+      </button>
+
+      <p class="privacy-note">
+        ご入力いただいた情報は、お支払い処理のみに使用します。<br>
+        第三者への提供・目的外利用は行いません。
+      </p>
+
+    </form>
+  </div>
+
+  <!-- 完了画面 -->
+  <div id="success-screen">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#06C755" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="9 12 11 14 15 10"/>
+      </svg>
+    </div>
+    <h2>登録が完了しました！</h2>
+    <p>ご登録ありがとうございます。<br>お支払い情報を受け付けました。<br><br>ご不明な点がございましたら<br>担当者までお問い合わせください。</p>
+  </div>
+
+  <script>
+    // ============================================================
+    // 設定：デプロイ後にここを書き換えてください
+    // ============================================================
+    const LIFF_ID = '2012134301-LkUNjx8p';                  // LINE Developers で取得
+    const GAS_URL = 'YOUR_GAS_WEBAPP_URL';           // GAS デプロイ後に取得
+    // ============================================================
+
+    let lineUserId = '';
+
+    // ── LIFF 初期化 ──
+    async function initLiff() {
+      try {
+        await liff.init({ liffId: LIFF_ID });
+
+        if (!liff.isLoggedIn()) {
+          liff.login();
+          return;
+        }
+
+        const profile = await liff.getProfile();
+        lineUserId = profile.userId;
+
+        document.getElementById('display-uid').textContent = lineUserId;
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+
+      } catch (err) {
+        console.error('LIFF初期化エラー:', err);
+        document.getElementById('loading-screen').innerHTML =
+          '<p style="color:#ef4444;">LINEの認証に失敗しました。<br>LINEアプリからもう一度お試しください。</p>';
+      }
+    }
+
+    // ── バリデーション ──
+    function validate() {
+      const fields = [
+        { id: 'influencer-id', errId: 'err-influencer-id' },
+        { id: 'full-name',     errId: 'err-full-name' },
+        { id: 'address',       errId: 'err-address' },
+        { id: 'bank-name',     errId: 'err-bank-name' },
+        { id: 'branch-name',   errId: 'err-branch-name' },
+        { id: 'account-type',  errId: 'err-account-type' },
+        { id: 'account-number',errId: 'err-account-number' },
+        { id: 'account-holder',errId: 'err-account-holder' },
+      ];
+
+      let valid = true;
+
+      fields.forEach(({ id, errId }) => {
+        const el  = document.getElementById(id);
+        const err = document.getElementById(errId);
+        if (!el.value.trim()) {
+          el.classList.add('error');
+          err.style.display = 'block';
+          valid = false;
+        } else {
+          el.classList.remove('error');
+          err.style.display = 'none';
+        }
+      });
+
+      return valid;
+    }
+
+    // ── フォーム送信 ──
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!validate()) return;
+
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>送信中...';
+
+      const payload = {
+        lineUserId:     lineUserId,
+        influencerId:   document.getElementById('influencer-id').value.trim(),
+        fullName:       document.getElementById('full-name').value.trim(),
+        address:        document.getElementById('address').value.trim(),
+        bankName:       document.getElementById('bank-name').value.trim(),
+        branchName:     document.getElementById('branch-name').value.trim(),
+        accountType:    document.getElementById('account-type').value,
+        accountNumber:  document.getElementById('account-number').value.trim(),
+        accountHolder:  document.getElementById('account-holder').value.trim(),
+        submittedAt:    new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }),
+      };
+
+      try {
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const result = await res.json();
+
+        if (result.status === 'ok') {
+          document.getElementById('main-content').style.display = 'none';
+          document.getElementById('success-screen').style.display = 'block';
+        } else {
+          throw new Error(result.message || '送信失敗');
+        }
+
+      } catch (err) {
+        console.error('送信エラー:', err);
+        alert('送信に失敗しました。\n時間をおいて再度お試しください。\n\nエラー: ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = '登録する';
+      }
+    });
+
+    // ── 起動 ──
+    initLiff();
+  </script>
+</body>
+</html>
