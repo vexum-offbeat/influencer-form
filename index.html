@@ -851,21 +851,34 @@
 
     const KANJI_DIGITS = { '0':'〇','1':'一','2':'二','3':'三','4':'四','5':'五','6':'六','7':'七','8':'八','9':'九' };
 
-    // 記号（5桁）→ 店番（3桁）・店名
+    // 記号（5桁）→ 店番（3桁）・店名・口座種別
+    // 記号1桁目が「1」→ 通常貯金（店番末尾=8、口座種別=通常）
+    // 記号1桁目が「0」→ 振替口座（店番末尾=9、口座種別=当座）
     function kigoToTenban(kigo) {
       if (kigo.length !== 5) return null;
-      const tenban = kigo.slice(1, 3) + '8'; // 2・3桁目 + "8"
+      const isVibrikae = kigo[0] === '0'; // 振替口座判定
+      const suffix = isVibrikae ? '9' : '8';
+      const tenban = kigo.slice(1, 3) + suffix;
       const tenName = tenban.split('').map(d => KANJI_DIGITS[d] || d).join('') + '店';
-      return { tenban, tenName };
+      const accountType = isVibrikae ? '当座' : '通常';
+      return { tenban, tenName, accountType, isVibrikae };
     }
 
-    // 番号（最大8桁）→ 振込用口座番号（7桁）
-    function bangoToKouzaNum(bango) {
+    // 番号 → 振込用口座番号（7桁）
+    // 通常貯金（記号1始まり）：末尾1桁（チェックディジット）を除いて7桁ゼロ埋め
+    // 振替口座（記号0始まり）：末尾除去なし、7桁未満なら左ゼロ埋めのみ
+    function bangoToKouzaNum(bango, isVibrikae) {
       const digits = bango.replace(/\D/g, '');
-      if (digits.length < 2) return null;
-      // 末尾1桁（チェックディジット）を除いて7桁右詰めゼロ埋め
-      const trimmed = digits.slice(0, -1);
-      return trimmed.padStart(7, '0');
+      if (digits.length < 1) return null;
+      if (isVibrikae) {
+        // 振替口座：そのまま7桁左ゼロ埋め
+        return digits.padStart(7, '0');
+      } else {
+        // 通常貯金：末尾1桁（チェックディジット）を除いて7桁ゼロ埋め
+        if (digits.length < 2) return null;
+        const trimmed = digits.slice(0, -1);
+        return trimmed.padStart(7, '0');
+      }
     }
 
     // ── 金融機関種別の切り替え ──
@@ -1029,12 +1042,19 @@
         }
       }
 
-      // バグ3修正：ゆうちょ番号が最低2桁以上あるかチェック（変換に最低2桁必要）
+      // バグ3修正：ゆうちょ番号の桁数チェック
+      // 通常貯金（記号1始まり）：末尾チェックディジット除去するため最低2桁必要
+      // 振替口座（記号0始まり）：そのまま使うため最低1桁でOK
       if (isYucho && valid) {
+        const kigo  = document.getElementById('yucho-kigo').value.trim();
         const bango = document.getElementById('yucho-bango').value.trim();
-        if (bango.length < 2) {
+        const isVibrikae = kigo[0] === '0';
+        const minLen = isVibrikae ? 1 : 2;
+        if (bango.length < minLen) {
           document.getElementById('yucho-bango').classList.add('error');
-          document.getElementById('err-yucho-bango').textContent = '番号は2桁以上で入力してください';
+          document.getElementById('err-yucho-bango').textContent = isVibrikae
+            ? '番号を入力してください'
+            : '番号は2桁以上で入力してください';
           document.getElementById('err-yucho-bango').style.display = 'block';
           valid = false;
         }
@@ -1075,20 +1095,22 @@
 
       if (isYucho) {
         // ゆうちょ：変換を実施してセット
+        // 記号1桁目が「0」→振替口座（法人等）、「1」→通常貯金（個人）
         const kigo  = document.getElementById('yucho-kigo').value.trim();
         const bango = document.getElementById('yucho-bango').value.trim();
         const tenInfo  = kigoToTenban(kigo);
-        const kouzaNum = bangoToKouzaNum(bango);
+        const isVibrikae = tenInfo ? tenInfo.isVibrikae : false;
+        const kouzaNum = bangoToKouzaNum(bango, isVibrikae);
 
         payload = {
           ...payload,
           bankName:      'ゆうちょ銀行',
-          branchName:    tenInfo ? tenInfo.tenName : '',  // 例：〇一八店
-          accountType:   '通常',
-          accountNumber: kouzaNum || '',                  // 振込用7桁口座番号
-          yuchoKigo:     kigo,                            // 元データ保存
-          yuchoBango:    bango,                           // 元データ保存
-          yuchoTenban:   tenInfo ? tenInfo.tenban : '',   // 振込用店番
+          branchName:    tenInfo ? tenInfo.tenName : '',   // 例：〇一八店 or 〇一九店
+          accountType:   tenInfo ? tenInfo.accountType : '通常', // 通常貯金=通常、振替口座=当座
+          accountNumber: kouzaNum || '',                   // 振込用7桁口座番号
+          yuchoKigo:     kigo,                             // 元データ保存
+          yuchoBango:    bango,                            // 元データ保存
+          yuchoTenban:   tenInfo ? tenInfo.tenban : '',    // 振込用店番
         };
       } else {
         payload = {
