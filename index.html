@@ -495,9 +495,9 @@
         </div>
 
         <div class="field">
-          <label>本名（フルネーム）<span class="required">*</span></label>
-          <input type="text" id="full-name" placeholder="例：山田 太郎" required />
-          <div class="error-msg" id="err-full-name">本名を入力してください</div>
+          <label>氏名 / 法人名（屋号）<span class="required">*</span></label>
+          <input type="text" id="full-name" placeholder="例：山田 太郎 または 株式会社〇〇" required />
+          <div class="error-msg" id="err-full-name">氏名または法人名を入力してください</div>
         </div>
 
         <div class="field-group">
@@ -574,7 +574,7 @@
           </div>
 
           <div class="field">
-            <label>口座種別 <span class="required">*</span></label>
+            <label>口座種別 <span class="required">*</span><span class="hint">（法人の当座預金の場合は「当座」を選択）</span></label>
             <select id="account-type">
               <option value="">選択してください</option>
               <option value="普通">普通</option>
@@ -612,8 +612,8 @@
 
         <!-- 口座名義（共通） -->
         <div class="field">
-          <label>口座名義（カタカナ）<span class="required">*</span></label>
-          <input type="text" id="account-holder" placeholder="例：ヤマダ タロウ" required />
+          <label>口座名義（カタカナ）<span class="required">*</span><span class="hint">（法人の場合は法人名義）</span></label>
+          <input type="text" id="account-holder" placeholder="例：ヤマダ タロウ または カブシキガイシャ〇〇" required />
           <div class="error-msg" id="err-account-holder">口座名義をカタカナで入力してください</div>
         </div>
       </div>
