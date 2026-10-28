@@ -191,6 +191,27 @@
       appearance: none;
     }
 
+    /* 日付入力欄のラッパーとカレンダーアイコン */
+    .date-input-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .date-input-wrapper input {
+      padding-right: 44px;
+      cursor: pointer;
+    }
+
+    .date-icon {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      font-size: 18px;
+      opacity: 0.5;
+    }
+
     /* iOSの日付ピッカーのテキスト表示と高さを完全に均一化 */
     input[type="date"] {
       line-height: 1.4;
@@ -651,7 +672,16 @@
         <!-- 生年月日（任意） -->
         <div class="field">
           <label>生年月日 <span class="hint">（任意）</span></label>
-          <input type="date" id="birthday" />
+          <div class="date-input-wrapper">
+            <input
+              type="text"
+              id="birthday"
+              placeholder="タップして生年月日を選択"
+              onfocus="(this.type='date'); try{this.showPicker()}catch(e){}"
+              onblur="if(!this.value) this.type='text'"
+            />
+            <span class="date-icon">📅</span>
+          </div>
         </div>
 
         <div class="field-group">
