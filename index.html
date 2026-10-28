@@ -1484,11 +1484,13 @@
 
     // バグ6修正：閉じるボタンの処理（LIFFウィンドウを閉じる）
     function closeLiff() {
-      if (liff.isInClient()) {
+      if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
         liff.closeWindow();
       } else {
-        // ブラウザで開いている場合はタブを閉じる（閉じられない場合はメッセージ）
+        // ブラウザで開いている場合はタブのクローズを試みる
         window.close();
+        // ブラウザのセキュリティで閉じられなかった場合のフォールバック案内
+        alert('ご登録ありがとうございました。\nブラウザのタブを閉じてLINEにお戻りください。');
       }
     }
   </script>
