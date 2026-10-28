@@ -172,18 +172,29 @@
 
     input[type="text"],
     input[type="tel"],
+    input[type="date"],
     select,
     textarea {
+      display: block;
       width: 100%;
-      padding: 11px 14px;
+      min-height: 48px;
+      padding: 12px 14px;
       border: 1.5px solid var(--border);
       border-radius: 8px;
-      font-size: 15px;
+      font-size: 16px; /* iPhoneでズームしない最適な大きさ */
       font-family: inherit;
       color: var(--text);
       background: #fafafa;
+      box-sizing: border-box;
       transition: border-color 0.2s, box-shadow 0.2s;
       -webkit-appearance: none;
+      appearance: none;
+    }
+
+    /* iOSの日付ピッカーのテキスト表示と高さを完全に均一化 */
+    input[type="date"] {
+      line-height: 1.4;
+      text-align: left;
     }
 
     input:focus, select:focus, textarea:focus {
@@ -613,10 +624,17 @@
           <div class="error-msg" id="err-is-room">「はい」または「いいえ」を選択してください</div>
         </div>
 
+        <!-- 氏名（必須） -->
         <div class="field">
-          <label>氏名 / 法人名（屋号）<span class="required">*</span></label>
-          <input type="text" id="full-name" placeholder="例：山田 太郎 または 株式会社〇〇" required />
-          <div class="error-msg" id="err-full-name">氏名または法人名を入力してください</div>
+          <label>氏名 <span class="required">*</span></label>
+          <input type="text" id="full-name" placeholder="例：山田 太郎" required />
+          <div class="error-msg" id="err-full-name">氏名を入力してください</div>
+        </div>
+
+        <!-- 法人名・屋号（任意） -->
+        <div class="field">
+          <label>法人名・屋号 <span class="hint">（任意・法人をお持ちの方のみ）</span></label>
+          <input type="text" id="company-name" placeholder="例：株式会社〇〇" />
         </div>
 
         <!-- 性別（任意） -->
@@ -1410,6 +1428,7 @@
         influencerEntries:  influencerEntries,
         isRoom:             roomChecked ? roomChecked.value : '',
         fullName:           document.getElementById('full-name').value.trim(),
+        companyName:        (document.getElementById('company-name') ? document.getElementById('company-name').value.trim() : ''),
         gender:             document.getElementById('gender').value,
         birthday:           document.getElementById('birthday').value,
         address:            fullAddress,
