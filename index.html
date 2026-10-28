@@ -875,11 +875,29 @@
     }
 
     // イベントリスナー（デバウンス 500ms）
-    document.getElementById('bank-code')
-      .addEventListener('input', debounce((e) => lookupBank(e.target.value.trim()), 500));
+    const bankCodeInput = document.getElementById('bank-code');
+    bankCodeInput.addEventListener('input', debounce((e) => lookupBank(e.target.value.trim()), 500));
+    // フォーカスが外れた時に桁数不足なら自動で0埋めして再検索
+    bankCodeInput.addEventListener('blur', (e) => {
+      const val = e.target.value.trim();
+      if (val && val.length < 4) {
+        const padded = val.padStart(4, '0');
+        e.target.value = padded;
+        lookupBank(padded);
+      }
+    });
 
-    document.getElementById('branch-code')
-      .addEventListener('input', debounce((e) => lookupBranch(e.target.value.trim()), 500));
+    const branchCodeInput = document.getElementById('branch-code');
+    branchCodeInput.addEventListener('input', debounce((e) => lookupBranch(e.target.value.trim()), 500));
+    // フォーカスが外れた時に桁数不足なら自動で0埋めして再検索
+    branchCodeInput.addEventListener('blur', (e) => {
+      const val = e.target.value.trim();
+      if (val && val.length < 3) {
+        const padded = val.padStart(3, '0');
+        e.target.value = padded;
+        lookupBranch(padded);
+      }
+    });
 
     // ============================================================
     // 郵便番号 住所自動検索ロジック（zipcloud API）
