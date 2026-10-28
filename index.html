@@ -459,13 +459,40 @@
 
     .btn-close:active { opacity: 0.8; }
 
-    /* ── プライバシー注記 ── */
-    .privacy-note {
-      font-size: 11px;
-      color: var(--text-sub);
-      text-align: center;
-      margin-top: 16px;
+    /* ── プライバシー注記（安心・信頼ボックス） ── */
+    .privacy-card {
+      background: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      border-left: 4px solid var(--line-green);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin: 20px 0 16px;
+      text-align: left;
+    }
+
+    .privacy-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      color: #1e293b;
+      margin-bottom: 6px;
+    }
+
+    .privacy-card-header svg {
+      flex-shrink: 0;
+      color: var(--line-green);
+    }
+
+    .privacy-card-body {
+      font-size: 13px;
+      color: #334155;
       line-height: 1.6;
+    }
+
+    .privacy-card-body strong {
+      color: #0f172a;
     }
 
     /* ── ローディング ── */
@@ -727,14 +754,24 @@
         </div>
       </div>
 
+      <!-- プライバシー保護・利用目的カード（目立つ表示） -->
+      <div class="privacy-card">
+        <div class="privacy-card-header">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <polyline points="9 12 11 14 15 10"/>
+          </svg>
+          <span>個人情報の保護・取り扱いについて</span>
+        </div>
+        <div class="privacy-card-body">
+          ご入力いただいた情報は、<strong>お支払い処理のみに使用</strong>いたします。<br>
+          <strong>第三者への提供・目的外利用は一切行いません。</strong>
+        </div>
+      </div>
+
       <button type="submit" class="btn-submit" id="submit-btn">
         登録する
       </button>
-
-      <p class="privacy-note">
-        ご入力いただいた情報は、お支払い処理のみに使用します。<br>
-        第三者への提供・目的外利用は行いません。
-      </p>
 
     </form>
   </div>
