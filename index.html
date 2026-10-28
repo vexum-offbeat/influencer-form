@@ -115,6 +115,18 @@
       color: #b45309;
     }
 
+    .already-registered-banner .banner-timestamp {
+      margin: 6px 0 8px;
+      padding: 4px 10px;
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #78350f;
+      display: inline-block;
+    }
+
     /* ── カード・セクション ── */
     .card {
       background: var(--card);
@@ -246,6 +258,17 @@
       gap: 10px;
     }
 
+    .radio-group-row {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+    }
+
+    .radio-group-row .radio-option {
+      flex: 1;
+      justify-content: center;
+    }
+
     .radio-option {
       display: flex;
       align-items: center;
@@ -288,14 +311,39 @@
 
     /* ── インフルエンサーID 複数入力 ── */
     .influencer-id-row {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .influencer-id-row-header {
       display: flex;
       gap: 8px;
       align-items: center;
       margin-bottom: 8px;
     }
 
-    .influencer-id-row input {
+    .influencer-id-row-header input {
       flex: 1;
+    }
+
+    .influencer-id-selects {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .influencer-id-selects .field {
+      flex: 1;
+      min-width: 130px;
+      margin-bottom: 0 !important;
+    }
+
+    .influencer-id-selects label {
+      font-size: 12px;
     }
 
     .btn-remove-id {
@@ -473,6 +521,9 @@
       <div class="banner-title">⚠️ すでに登録済みのアカウントです</div>
       <div>
         このLINEアカウントの情報はすでに受け付け済みです。<br>
+        <div class="banner-timestamp">
+          📅 前回登録日時：<span id="registered-timestamp">確認中...</span>
+        </div>
         <strong>登録内容や振込先口座を変更したい場合のみ</strong>、新しい内容を入力して送信してください（最新情報に更新されます）。
       </div>
     </div>
@@ -484,20 +535,78 @@
         <div class="section-title">📋 基本情報</div>
 
         <div class="field">
-          <label>インフルエンサーID <span class="required">*</span></label>
+          <label>インフルエンサーID <span class="required">*</span><span class="hint">アカウントごとに媒体・ジャンルを設定</span></label>
           <div id="influencer-id-list">
             <div class="influencer-id-row" data-index="0">
-              <input type="text" class="influencer-id-input" placeholder="例：influencer_001" />
+              <div class="influencer-id-row-header">
+                <input type="text" class="influencer-id-input" placeholder="例：influencer_001" />
+              </div>
+              <div class="influencer-id-selects">
+                <div class="field">
+                  <label>媒体名 <span class="required">*</span></label>
+                  <select class="media-name-select">
+                    <option value="">選択</option>
+                    <option value="Instagram">Instagram</option>
+                    <option value="TikTok">TikTok</option>
+                    <option value="X">X（旧Twitter）</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>ジャンル <span class="required">*</span></label>
+                  <select class="genre-select">
+                    <option value="">選択</option>
+                    <option value="ライフスタイル">ライフスタイル</option>
+                    <option value="ファッション">ファッション</option>
+                    <option value="料理・グルメ">料理・グルメ</option>
+                    <option value="美容">美容</option>
+                    <option value="キッズ・ベビー">キッズ・ベビー</option>
+                    <option value="その他">その他</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
           <button type="button" class="btn-add-id" id="btn-add-id">＋ アカウントを追加</button>
-          <div class="error-msg" id="err-influencer-id">インフルエンサーIDを1つ以上入力してください</div>
+          <div class="error-msg" id="err-influencer-id">インフルエンサーIDと媒体名・ジャンルをすべて入力してください</div>
+        </div>
+
+        <!-- ROOMインフルエンサー（必須） -->
+        <div class="field">
+          <label>ROOMインフルエンサーですか？ <span class="required">*</span></label>
+          <div class="radio-group-row">
+            <label class="radio-option">
+              <input type="radio" name="is-room" value="はい" />
+              はい
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="is-room" value="いいえ" />
+              いいえ
+            </label>
+          </div>
+          <div class="error-msg" id="err-is-room">「はい」または「いいえ」を選択してください</div>
         </div>
 
         <div class="field">
           <label>氏名 / 法人名（屋号）<span class="required">*</span></label>
           <input type="text" id="full-name" placeholder="例：山田 太郎 または 株式会社〇〇" required />
           <div class="error-msg" id="err-full-name">氏名または法人名を入力してください</div>
+        </div>
+
+        <!-- 性別（任意） -->
+        <div class="field">
+          <label>性別 <span class="hint">（任意）</span></label>
+          <select id="gender">
+            <option value="">未選択</option>
+            <option value="男性">男性</option>
+            <option value="女性">女性</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+
+        <!-- 生年月日（任意） -->
+        <div class="field">
+          <label>生年月日 <span class="hint">（任意）</span></label>
+          <input type="date" id="birthday" />
         </div>
 
         <div class="field-group">
@@ -549,7 +658,7 @@
             <div class="field-group-label">🏦 金融機関</div>
             <div class="field">
               <label>金融機関コード<span class="hint">（4桁・任意）コード入力で名称を自動入力</span></label>
-              <input type="tel" id="bank-code" placeholder="例：0005" maxlength="4" inputmode="numeric" />
+              <input type="tel" id="bank-code" placeholder="例：0005" maxlength="4" inputmode="numeric" autocomplete="off" />
               <div class="lookup-status" id="status-bank"></div>
             </div>
             <div class="field">
@@ -563,7 +672,7 @@
             <div class="field-group-label">🏢 支店</div>
             <div class="field">
               <label>支店コード<span class="hint">（3桁・任意）コード入力で名称を自動入力</span></label>
-              <input type="tel" id="branch-code" placeholder="例：001" maxlength="3" inputmode="numeric" />
+              <input type="tel" id="branch-code" placeholder="例：001" maxlength="3" inputmode="numeric" autocomplete="off" />
               <div class="lookup-status" id="status-branch"></div>
             </div>
             <div class="field">
@@ -935,6 +1044,10 @@
 
         if (result.status === 'ok' && result.registered) {
           // すでに登録されている場合：バナーを表示しボタン文言を変更
+          const timeEl = document.getElementById('registered-timestamp');
+          if (timeEl && result.registeredAt) {
+            timeEl.textContent = result.registeredAt;
+          }
           document.getElementById('already-registered-banner').style.display = 'block';
           const btn = document.getElementById('submit-btn');
           if (btn) btn.textContent = '登録内容を更新する';
@@ -947,11 +1060,37 @@
     // ── インフルエンサーIDの動的追加・削除 ──
     document.getElementById('btn-add-id').addEventListener('click', () => {
       const list = document.getElementById('influencer-id-list');
+      const idx  = list.children.length;
       const newRow = document.createElement('div');
       newRow.className = 'influencer-id-row';
       newRow.innerHTML = `
-        <input type="text" class="influencer-id-input" placeholder="例：influencer_002" />
-        <button type="button" class="btn-remove-id" title="削除">✕</button>
+        <div class="influencer-id-row-header">
+          <input type="text" class="influencer-id-input" placeholder="例：influencer_00${idx + 1}" />
+          <button type="button" class="btn-remove-id" title="削除">✕</button>
+        </div>
+        <div class="influencer-id-selects">
+          <div class="field">
+            <label>媒体名 <span class="required">*</span></label>
+            <select class="media-name-select">
+              <option value="">選択</option>
+              <option value="Instagram">Instagram</option>
+              <option value="TikTok">TikTok</option>
+              <option value="X">X（旧Twitter）</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>ジャンル <span class="required">*</span></label>
+            <select class="genre-select">
+              <option value="">選択</option>
+              <option value="ライフスタイル">ライフスタイル</option>
+              <option value="ファッション">ファッション</option>
+              <option value="料理・グルメ">料理・グルメ</option>
+              <option value="美容">美容</option>
+              <option value="キッズ・ベビー">キッズ・ベビー</option>
+              <option value="その他">その他</option>
+            </select>
+          </div>
+        </div>
       `;
 
       // 削除ボタンのイベント
@@ -963,15 +1102,17 @@
       newRow.querySelector('input').focus();
     });
 
-    // ── インフルエンサーIDの取得ユーティリティ ──
-    function getInfluencerIds() {
-      const inputs = document.querySelectorAll('.influencer-id-input');
-      const ids = [];
-      inputs.forEach(input => {
-        const val = input.value.trim();
-        if (val) ids.push(val);
+    // ── インフルエンサーエントリーの取得ユーティリティ（ID + 媒体名 + ジャンル）──
+    function getInfluencerEntries() {
+      const rows = document.querySelectorAll('.influencer-id-row');
+      const entries = [];
+      rows.forEach(row => {
+        const id    = row.querySelector('.influencer-id-input').value.trim();
+        const media = row.querySelector('.media-name-select').value;
+        const genre = row.querySelector('.genre-select').value;
+        if (id) entries.push({ id, media, genre });
       });
-      return ids;
+      return entries;
     }
 
     // ── バリデーション ──
@@ -979,21 +1120,41 @@
       const isYucho = document.querySelector('input[name="bank-type"]:checked').value === 'yucho';
       let valid = true;
 
-      // インフルエンサーIDチェック（1つ以上必須）
-      const influencerIds = getInfluencerIds();
-      const firstIdInput = document.querySelector('.influencer-id-input');
+      // インフルエンサーエントリーチェック（1つ以上かつID・媒体名・ジャンルすべて入力必須）
+      const entries = getInfluencerEntries();
       const errIdEl = document.getElementById('err-influencer-id');
+      const rows    = document.querySelectorAll('.influencer-id-row');
 
-      if (influencerIds.length === 0) {
-        if (firstIdInput) firstIdInput.classList.add('error');
+      // エラースタイルをリセット
+      rows.forEach(row => {
+        row.querySelector('.influencer-id-input').classList.remove('error');
+        row.querySelectorAll('select').forEach(s => s.classList.remove('error'));
+      });
+      if (errIdEl) errIdEl.style.display = 'none';
+
+      // 入力済みIDがゼロ、または不完全なエントリーがある場合エラー
+      let idValid = true;
+      rows.forEach(row => {
+        const idInput = row.querySelector('.influencer-id-input');
+        const mediaEl = row.querySelector('.media-name-select');
+        const genreEl = row.querySelector('.genre-select');
+        const idVal   = idInput.value.trim();
+
+        // IDが空でも媒体・ジャンルのどちらかが入力されている場合：ID入力を求める
+        const anyFilled = idVal || mediaEl.value || genreEl.value;
+        if (anyFilled) {
+          if (!idVal)         { idInput.classList.add('error'); idValid = false; }
+          if (!mediaEl.value) { mediaEl.classList.add('error'); idValid = false; }
+          if (!genreEl.value) { genreEl.classList.add('error'); idValid = false; }
+        }
+      });
+
+      if (entries.length === 0 || !idValid) {
         if (errIdEl) errIdEl.style.display = 'block';
         valid = false;
-      } else {
-        document.querySelectorAll('.influencer-id-input').forEach(input => input.classList.remove('error'));
-        if (errIdEl) errIdEl.style.display = 'none';
       }
 
-      // 共通項目
+      // 共通項目（媒体名・ジャンルはID行内に移動したため削除）
       const commonFields = [
         { id: 'full-name',      errId: 'err-full-name' },
         { id: 'postal-code',    errId: 'err-postal-code' },
@@ -1030,6 +1191,16 @@
           if (err) err.style.display = 'none';
         }
       });
+
+      // ROOMインフルエンサーチェック（はい/いいえ 必須）
+      const roomChecked = document.querySelector('input[name="is-room"]:checked');
+      const errRoom = document.getElementById('err-is-room');
+      if (!roomChecked) {
+        if (errRoom) errRoom.style.display = 'block';
+        valid = false;
+      } else {
+        if (errRoom) errRoom.style.display = 'none';
+      }
 
       // ゆうちょ: 記号が5桁かチェック
       if (isYucho && valid) {
@@ -1071,11 +1242,18 @@
       const btn = document.getElementById('submit-btn');
       // バグ1修正：送信前のボタン文言を保持しておく（失敗時の復元用）
       const originalBtnText = btn.textContent.trim();
+
+      // lineUserIdが取れていない場合は送信しない（LIFF初期化失敗時の保険）
+      if (!lineUserId) {
+        alert('LINEのユーザー情報が取得できていません。\nLINEアプリから開き直してください。');
+        return;
+      }
+
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span>送信中...';
 
       const isYucho = document.querySelector('input[name="bank-type"]:checked').value === 'yucho';
-      const influencerIds = getInfluencerIds();
+      const influencerEntries = getInfluencerEntries();
 
       // 住所の組み立て（〒郵便番号 都道府県市区町村 番地建物名）
       const postal = document.getElementById('postal-code').value.trim();
@@ -1083,14 +1261,19 @@
       const addr2  = document.getElementById('address-detail').value.trim();
       const fullAddress = `〒${postal} ${addr1} ${addr2}`.trim();
 
+      const roomChecked = document.querySelector('input[name="is-room"]:checked');
+
       let payload = {
-        lineUserId:    lineUserId,
-        influencerIds: influencerIds,
-        fullName:      document.getElementById('full-name').value.trim(),
-        address:       fullAddress,
-        accountHolder: document.getElementById('account-holder').value.trim(),
-        submittedAt:   new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }),
-        bankType:      isYucho ? 'yucho' : 'normal',
+        lineUserId:         lineUserId,
+        influencerEntries:  influencerEntries,
+        isRoom:             roomChecked ? roomChecked.value : '',
+        fullName:           document.getElementById('full-name').value.trim(),
+        gender:             document.getElementById('gender').value,
+        birthday:           document.getElementById('birthday').value,
+        address:            fullAddress,
+        accountHolder:      document.getElementById('account-holder').value.trim(),
+        submittedAt:        new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }),
+        bankType:           isYucho ? 'yucho' : 'normal',
       };
 
       if (isYucho) {
@@ -1115,11 +1298,14 @@
           yuchoTenban:   tenInfo ? tenInfo.tenban : '',    // 振込用店番
         };
       } else {
+        // 先頭ゼロ保持のため、入力されていれば規定桁数にゼロ埋めして送信
+        const rawBankCode   = document.getElementById('bank-code').value.trim();
+        const rawBranchCode = document.getElementById('branch-code').value.trim();
         payload = {
           ...payload,
-          bankCode:     document.getElementById('bank-code').value.trim(),
+          bankCode:     rawBankCode   ? rawBankCode.padStart(4, '0')   : '',
           bankName:     document.getElementById('bank-name').value.trim(),
-          branchCode:   document.getElementById('branch-code').value.trim(),
+          branchCode:   rawBranchCode ? rawBranchCode.padStart(3, '0') : '',
           branchName:   document.getElementById('branch-name').value.trim(),
           accountType:  document.getElementById('account-type').value,
           accountNumber:document.getElementById('account-number').value.trim(),
