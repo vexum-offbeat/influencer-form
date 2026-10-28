@@ -720,8 +720,8 @@
           </div>
 
           <div class="field">
-            <label>口座番号 <span class="required">*</span></label>
-            <input type="tel" id="account-number" placeholder="例：1234567" maxlength="8" />
+            <label>口座番号 <span class="required">*</span><span class="hint">（半角数字7桁）</span></label>
+            <input type="tel" id="account-number" placeholder="例：1234567" maxlength="7" inputmode="numeric" />
             <div class="error-msg" id="err-account-number">口座番号を入力してください</div>
           </div>
         </div>
@@ -1187,43 +1187,75 @@
       });
       if (errIdEl) errIdEl.style.display = 'none';
 
-      // 入力済みIDがゼロ、または不完全なエントリーがある場合エラー
+      // 入力済みIDがゼロ、または不完全なエントリー、日本語/不正文字が含まれる場合エラー
       let idValid = true;
+      let idFormatError = false;
+      const idRegex = /^[a-zA-Z0-9_.-]+$/; // 半角英数字・アンダースコア・ピリオド・ハイフンのみ
+
       rows.forEach(row => {
         const idInput = row.querySelector('.influencer-id-input');
         const mediaEl = row.querySelector('.media-name-select');
         const genreEl = row.querySelector('.genre-select');
         const idVal   = idInput.value.trim();
 
-        // IDが空でも媒体・ジャンルのどちらかが入力されている場合：ID入力を求める
         const anyFilled = idVal || mediaEl.value || genreEl.value;
         if (anyFilled) {
-          if (!idVal)         { idInput.classList.add('error'); idValid = false; }
+          if (!idVal) {
+            idInput.classList.add('error');
+            idValid = false;
+          } else if (!idRegex.test(idVal)) {
+            // 日本語や全角文字、スペースなどが入っている場合
+            idInput.classList.add('error');
+            idValid = false;
+            idFormatError = true;
+          }
           if (!mediaEl.value) { mediaEl.classList.add('error'); idValid = false; }
           if (!genreEl.value) { genreEl.classList.add('error'); idValid = false; }
         }
       });
 
       if (entries.length === 0 || !idValid) {
-        if (errIdEl) errIdEl.style.display = 'block';
+        if (errIdEl) {
+          errIdEl.textContent = idFormatError
+            ? 'インフルエンサーIDは半角英数字（記号は _ . - のみ）で入力してください（日本語・全角不可）'
+            : 'インフルエンサーIDと媒体名・ジャンルをすべて入力してください';
+          errIdEl.style.display = 'block';
+        }
         valid = false;
       }
 
-      // 共通項目（媒体名・ジャンルはID行内に移動したため削除）
+      // ── 郵便番号：空チェック＋7桁チェック（別処理で厳密に行う）──
+      const postalEl  = document.getElementById('postal-code');
+      const postalErr = document.getElementById('err-postal-code');
+      const postalRaw = postalEl ? postalEl.value.trim() : '';
+      const postalDigits = postalRaw.replace(/\D/g, '');
+      if (!postalRaw) {
+        postalEl.classList.add('error');
+        postalErr.textContent = '郵便番号を入力してください';
+        postalErr.style.display = 'block';
+        valid = false;
+      } else if (postalDigits.length !== 7) {
+        postalEl.classList.add('error');
+        postalErr.textContent = '郵便番号は7桁で入力してください（例：1000001 または 100-0001）';
+        postalErr.style.display = 'block';
+        valid = false;
+      } else {
+        postalEl.classList.remove('error');
+        postalErr.style.display = 'none';
+      }
+
+      // 共通項目（postal-code, account-holder は個別チェック）
       const commonFields = [
         { id: 'full-name',      errId: 'err-full-name' },
-        { id: 'postal-code',    errId: 'err-postal-code' },
         { id: 'address-auto',   errId: 'err-address-auto' },
         { id: 'address-detail', errId: 'err-address-detail' },
-        { id: 'account-holder', errId: 'err-account-holder' },
       ];
 
-      // 一般銀行専用項目
+      // 一般銀行専用項目（account-number は個別チェック）
       const normalFields = [
         { id: 'bank-name',      errId: 'err-bank-name' },
         { id: 'branch-name',    errId: 'err-branch-name' },
         { id: 'account-type',   errId: 'err-account-type' },
-        { id: 'account-number', errId: 'err-account-number' },
       ];
 
       // ゆうちょ専用項目
@@ -1247,6 +1279,51 @@
         }
       });
 
+      // ── 口座番号チェック（一般銀行のみ：半角数字1〜7桁）──
+      if (!isYucho) {
+        const accNumEl  = document.getElementById('account-number');
+        const accNumErr = document.getElementById('err-account-number');
+        const accNumVal = accNumEl ? accNumEl.value.trim() : '';
+        const numRegex  = /^[0-9]{1,7}$/; // 半角数字1〜7桁
+
+        if (!accNumVal) {
+          accNumEl.classList.add('error');
+          accNumErr.textContent = '口座番号を入力してください';
+          accNumErr.style.display = 'block';
+          valid = false;
+        } else if (!numRegex.test(accNumVal)) {
+          accNumEl.classList.add('error');
+          accNumErr.textContent = '口座番号は半角数字（1〜7桁）で入力してください（ハイフン不可）';
+          accNumErr.style.display = 'block';
+          valid = false;
+        } else {
+          accNumEl.classList.remove('error');
+          accNumErr.style.display = 'none';
+        }
+      }
+
+      // ── 口座名義（カナ）チェック：カタカナのみ（ひらがな・漢字・ローマ字不可）──
+      const holderEl  = document.getElementById('account-holder');
+      const holderErr = document.getElementById('err-account-holder');
+      const holderVal = holderEl ? holderEl.value.trim() : '';
+      // 全角カタカナ、半角カタカナ、長音、法人用括弧、スペース、中黒のみ許可
+      const kanaRegex = /^[ァ-ヶー\uFF66-\uFF9F\s　()（）･・]+$/;
+
+      if (!holderVal) {
+        holderEl.classList.add('error');
+        holderErr.textContent = '口座名義をカタカナで入力してください';
+        holderErr.style.display = 'block';
+        valid = false;
+      } else if (!kanaRegex.test(holderVal)) {
+        holderEl.classList.add('error');
+        holderErr.textContent = '口座名義はカタカナで入力してください（ひらがな・漢字・ローマ字不可）';
+        holderErr.style.display = 'block';
+        valid = false;
+      } else {
+        holderEl.classList.remove('error');
+        holderErr.style.display = 'none';
+      }
+
       // ROOMインフルエンサーチェック（はい/いいえ 必須）
       const roomChecked = document.querySelector('input[name="is-room"]:checked');
       const errRoom = document.getElementById('err-is-room');
@@ -1257,32 +1334,42 @@
         if (errRoom) errRoom.style.display = 'none';
       }
 
-      // ゆうちょ: 記号が5桁かチェック
-      if (isYucho && valid) {
-        const kigo = document.getElementById('yucho-kigo').value.trim();
+      // ゆうちょ: 記号が5桁かチェック（他のエラーがあっても独立して判定）
+      if (isYucho) {
+        const kigoEl = document.getElementById('yucho-kigo');
+        const kigoErr = document.getElementById('err-yucho-kigo');
+        const kigo = kigoEl.value.trim();
         if (kigo.length !== 5) {
-          document.getElementById('yucho-kigo').classList.add('error');
-          document.getElementById('err-yucho-kigo').textContent = '記号は5桁で入力してください';
-          document.getElementById('err-yucho-kigo').style.display = 'block';
+          kigoEl.classList.add('error');
+          kigoErr.textContent = kigo.length === 0 ? '記号を入力してください' : '記号は5桁で入力してください';
+          kigoErr.style.display = 'block';
           valid = false;
+        } else {
+          kigoEl.classList.remove('error');
+          kigoErr.style.display = 'none';
         }
       }
 
-      // バグ3修正：ゆうちょ番号の桁数チェック
+      // ゆうちょ: 番号の桁数チェック（他のエラーがあっても独立して判定）
       // 通常貯金（記号1始まり）：末尾チェックディジット除去するため最低2桁必要
       // 振替口座（記号0始まり）：そのまま使うため最低1桁でOK
-      if (isYucho && valid) {
-        const kigo  = document.getElementById('yucho-kigo').value.trim();
-        const bango = document.getElementById('yucho-bango').value.trim();
-        const isVibrikae = kigo[0] === '0';
+      if (isYucho) {
+        const kigoVal = document.getElementById('yucho-kigo').value.trim();
+        const bangoEl = document.getElementById('yucho-bango');
+        const bangoErr = document.getElementById('err-yucho-bango');
+        const bango = bangoEl.value.trim();
+        const isVibrikae = kigoVal[0] === '0';
         const minLen = isVibrikae ? 1 : 2;
         if (bango.length < minLen) {
-          document.getElementById('yucho-bango').classList.add('error');
-          document.getElementById('err-yucho-bango').textContent = isVibrikae
+          bangoEl.classList.add('error');
+          bangoErr.textContent = bango.length === 0
             ? '番号を入力してください'
-            : '番号は2桁以上で入力してください';
-          document.getElementById('err-yucho-bango').style.display = 'block';
+            : (isVibrikae ? '番号を入力してください' : '番号は2桁以上で入力してください');
+          bangoErr.style.display = 'block';
           valid = false;
+        } else {
+          bangoEl.classList.remove('error');
+          bangoErr.style.display = 'none';
         }
       }
 
@@ -1363,7 +1450,7 @@
           branchCode:   rawBranchCode ? rawBranchCode.padStart(3, '0') : '',
           branchName:   document.getElementById('branch-name').value.trim(),
           accountType:  document.getElementById('account-type').value,
-          accountNumber:document.getElementById('account-number').value.trim(),
+          accountNumber:document.getElementById('account-number').value.trim().padStart(7, '0'),
           yuchoKigo:    '',
           yuchoBango:   '',
           yuchoTenban:  '',
